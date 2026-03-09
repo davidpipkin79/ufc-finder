@@ -108,8 +108,8 @@ namespace UFCFinderApp
                 Browser.ExecuteScriptAsync(
                     string.Format(
                     @"                      
-                        document.getElementById('email').value = '{0}';
-                        document.getElementById('pass').value = '{1}';
+                        document.querySelector(""input[name='email']"").value = '{0}';
+                        document.querySelector(""input[name='pass']"").value = '{1}';
                         document.getElementsByTagName(""form"")[0].submit();
                     ",
                     Cryptography.Decrypt(fbEmail).Replace("'", "\\'"),
