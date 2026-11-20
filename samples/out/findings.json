@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-11-20T13:26:23.1325993-05:00",
+  "startedAt": "2026-11-20T13:26:22.6041163-05:00",
+  "durationSeconds": 0.5,
+  "pagesScanned": 3,
+  "postsScanned": 3,
+  "urlsConsidered": 3,
+  "findings": [
+    {
+      "severity": "Medium",
+      "score": 54,
+      "business": "Sample Tavern",
+      "address": "55 Elm Road, Denver, CO 80202",
+      "source": "Web page",
+      "url": "https://en.wikipedia.org/wiki/UFC_300",
+      "matchedPhrases": [
+        "UFC 300",
+        "pay-per-view"
+      ],
+      "signals": [
+        "commercial intent"
+      ],
+      "evidence": "\u2026] See also [ edit ] Martial Arts portal 2024 in UFC List of current UFC fighters List of UFC events References [ edit ] 1 2 Mike Bohn (2024-04-14). \u0022UFC 300 post-event facts: Max Holloway boosts records, resume with BMF title knockout\u0022 . mmajunkie.usatoday.com . Retrieved 2024-04-14 . \u2191 John Pollock (2026-03-27). \u0022Report: multiple UFC pa",
+      "discovered": false
+    },
+    {
+      "severity": "Medium",
+      "score": 54,
+      "business": "Sample Tavern",
+      "address": "55 Elm Road, Denver, CO 80202",
+      "source": "Web page",
+      "url": "https://en.wikipedia.org/wiki/Pay-per-view",
+      "matchedPhrases": [
+        "pay-per-view"
+      ],
+      "signals": [
+        "commercial intent",
+        "price or cover charge"
+      ],
+      "evidence": "\u2026t the signal into standard broadcast format. These services were marketed as ON-TV . Professional boxing during 1960s \u2013 1970s [ edit ] The first home pay-per-view cable television broadcast was the Floyd Patterson vs. Ingemar Johansson rematch in 1960, when 25,000 TelePrompTer subscribers mailed $2 to watch Patterson regain the heavyweigh\u2026",
+      "discovered": false
+    }
+  ],
+  "filteredAsLegal": [
+    {
+      "business": "Sample Legal Sports Bar",
+      "address": "100 Main St, Las Vegas, NV 89101",
+      "reason": "Matches a legal venue on the legal list"
+    },
+    {
+      "business": "Sample Grill",
+      "address": "9 Pine Lane, Tampa, FL 33602",
+      "reason": "Official rights-holder or broadcaster domain"
+    }
+  ],
+  "errors": []
+}

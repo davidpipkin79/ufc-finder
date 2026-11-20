@@ -1,0 +1,242 @@
+<Window x:Class="UFCFinderApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="UFC Event Host Finder"
+        Icon="ufc.ico"
+        Height="900" Width="1420"
+        MinHeight="720" MinWidth="1120"
+        Background="{StaticResource Bg}"
+        WindowStartupLocation="CenterScreen"
+        TextOptions.TextFormattingMode="Display">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="300" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="18,12">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="6" Height="26" Background="{StaticResource Accent}" CornerRadius="3" Margin="0,0,12,0" />
+                    <StackPanel>
+                        <TextBlock Text="UFC EVENT HOST FINDER" Foreground="{StaticResource Ink}" FontSize="16" FontWeight="Bold" />
+                        <TextBlock Text="Unauthorized showing &amp; advertising detection" Foreground="{StaticResource Muted}" FontSize="11" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="Browser session:" Foreground="{StaticResource Muted}" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <TextBlock Text="{Binding SessionStatus}" Foreground="{StaticResource Ink}" FontSize="11" VerticalAlignment="Center" MaxWidth="420" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="430" MinWidth="360" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" MinWidth="360" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Settings -->
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Padding="18,16,14,16">
+                <StackPanel>
+
+                    <TextBlock Text="EVENT PHRASES" Style="{StaticResource FieldLabel}" />
+                    <TextBox Text="{Binding Phrases, UpdateSourceTrigger=PropertyChanged}"
+                             Height="112"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             VerticalContentAlignment="Top" />
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,6,0,0"
+                               Text="One phrase per line. Combine the event with showing language for better leads, for example: UFC 320 | UFC 320 watch party | UFC 320 PPV | UFC 320 cover charge." />
+
+                    <Border Height="1" Background="{StaticResource Line}" Margin="0,16" />
+
+                    <TextBlock Text="LISTS" Style="{StaticResource FieldLabel}" />
+
+                    <TextBlock Text="Legal venues" Foreground="{StaticResource Ink}" FontSize="12" Margin="0,2,0,4" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{StaticResource PanelAlt}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="4" Padding="8,6">
+                            <TextBlock Text="{Binding LegalListFileName}" Foreground="{StaticResource Muted}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <Button Grid.Column="1" Content="Choose…" Margin="6,0,0,0" Click="ChooseLegalList_Click" Style="{StaticResource BaseButton}" />
+                    </Grid>
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,0" Text="Business, address, city, state, zip in columns A–E from row 3." />
+
+                    <TextBlock Text="Watch list" Foreground="{StaticResource Ink}" FontSize="12" Margin="0,12,0,4" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{StaticResource PanelAlt}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="4" Padding="8,6">
+                            <TextBlock Text="{Binding WatchListFileName}" Foreground="{StaticResource Muted}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <Button Grid.Column="1" Content="Choose…" Margin="6,0,0,0" Click="ChooseWatchList_Click" Style="{StaticResource BaseButton}" />
+                    </Grid>
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,0" Text="Same columns from row 2, with page URLs in column G (one per line)." />
+
+                    <Border Height="1" Background="{StaticResource Line}" Margin="0,16" />
+
+                    <TextBlock Text="SEARCH SOURCES" Style="{StaticResource FieldLabel}" />
+                    <CheckBox Content="Search the Meta Ad Library by keyword" IsChecked="{Binding UseAdLibrary}" />
+                    <CheckBox Content="Discover new pages through web search" IsChecked="{Binding UseDiscovery}" />
+                    <CheckBox Content="Scroll feeds to collect more posts" IsChecked="{Binding CollectPosts}" />
+                    <CheckBox Content="Mobile view (m.facebook.com) for a longer feed" IsChecked="{Binding UseMobileView}" />
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,0"
+                               Text="The ad library indexes advertisements directly, which catches promoters whose pages never mention the event by name." />
+
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Pause between pages" Foreground="{StaticResource Muted}" FontSize="11" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding RequestDelayLabel}" Foreground="{StaticResource Ink}" FontSize="11" VerticalAlignment="Center" />
+                    </Grid>
+                    <Slider Minimum="0.5" Maximum="6" TickFrequency="0.5" IsSnapToTickEnabled="True"
+                            Value="{Binding RequestDelaySeconds}" Margin="0,4,0,0" />
+
+                    <Border Height="1" Background="{StaticResource Line}" Margin="0,16" />
+
+                    <Button Content="START SCAN" Style="{StaticResource PrimaryButton}" Click="StartScan_Click" IsEnabled="{Binding IsIdle}" />
+                    <Button Content="Cancel scan" Style="{StaticResource BaseButton}" Click="CancelScan_Click" IsEnabled="{Binding IsBusy}" Margin="0,8,0,0" />
+
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Export CSV" Style="{StaticResource BaseButton}" Margin="0,0,4,0" Click="ExportCsv_Click" />
+                        <Button Grid.Column="1" Content="Export Excel" Style="{StaticResource BaseButton}" Margin="4,0,0,0" Click="ExportXlsx_Click" />
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="{StaticResource Bg}" />
+
+            <!-- Browser -->
+            <Grid Grid.Column="2" Margin="0,14,16,14">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="◀" Width="32" Style="{StaticResource BaseButton}" Click="Back_Click" />
+                    <Button Grid.Column="1" Content="▶" Width="32" Style="{StaticResource BaseButton}" Click="Forward_Click" Margin="4,0,0,0" />
+                    <Button Grid.Column="2" Content="⟳" Width="32" Style="{StaticResource BaseButton}" Click="Reload_Click" Margin="4,0,0,0" />
+
+                    <TextBox Grid.Column="3" Text="{Binding AddressText, UpdateSourceTrigger=PropertyChanged}" Margin="8,0,0,0"
+                             VerticalContentAlignment="Center" KeyDown="Address_KeyDown" />
+
+                    <Button Grid.Column="4" Content="Go" Style="{StaticResource BaseButton}" Margin="6,0,0,0" Click="Go_Click" />
+                    <Button Grid.Column="5" Content="Facebook" Style="{StaticResource BaseButton}" Margin="6,0,0,0" Click="OpenFacebook_Click" />
+                    <Button Grid.Column="6" Content="Reset session" Style="{StaticResource GhostButton}" Margin="6,0,0,0" Click="ResetSession_Click" />
+                </Grid>
+
+                <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="4" Background="{StaticResource Panel}" ClipToBounds="True">
+                    <wv2:WebView2 x:Name="Browser" />
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Results -->
+        <Grid Grid.Row="2" Margin="18,0,16,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="{Binding SummaryText}" Foreground="{StaticResource Muted}" FontSize="11" Margin="0,0,0,6" />
+
+            <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Padding="0">
+                <TabItem Header="Leads">
+                    <DataGrid ItemsSource="{Binding Findings}" Margin="0,6,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="80" />
+                            <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="55" />
+                            <DataGridTextColumn Header="Business" Binding="{Binding Business}" Width="180" />
+                            <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="180" />
+                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="120" />
+                            <DataGridTextColumn Header="Matched" Binding="{Binding Matched}" Width="190" />
+                            <DataGridTextColumn Header="Evidence" Binding="{Binding Evidence}" Width="*" />
+                            <DataGridTemplateColumn Header="" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock VerticalAlignment="Center">
+                                            <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="OnRequestNavigate" Style="{StaticResource HyperlinkStyle}">
+                                                <Run Text="Open" />
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Filtered as legal">
+                    <DataGrid ItemsSource="{Binding LegalRows}" Margin="0,6,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Business" Binding="{Binding Business}" Width="260" />
+                            <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="340" />
+                            <DataGridTextColumn Header="Reason" Binding="{Binding Reason}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Not scanned">
+                    <DataGrid ItemsSource="{Binding ErrorRows}" Margin="0,6,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="420" />
+                            <DataGridTextColumn Header="Reason" Binding="{Binding Message}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
+        <!-- Status -->
+        <Border Grid.Row="3" Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="18,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding StatusText}" Foreground="{StaticResource Muted}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+
+                <ProgressBar Grid.Column="1" Height="6" VerticalAlignment="Center"
+                             Background="{StaticResource PanelAlt}"
+                             Foreground="{StaticResource Accent}"
+                             BorderThickness="0"
+                             Minimum="0"
+                             Maximum="{Binding ProgressMaximum}"
+                             Value="{Binding ProgressValue}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
