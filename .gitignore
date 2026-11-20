@@ -254,3 +254,4 @@ paket-files/
 # Installer build output
 installer/publish/
 installer/extract-test/
+installer/MicrosoftEdgeWebView2Setup.exe

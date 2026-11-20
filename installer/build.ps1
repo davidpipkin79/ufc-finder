@@ -37,23 +37,40 @@ if ($LASTEXITCODE -ne 0) {
     throw "Publish failed."
 }
 
-Write-Host "Building installer..." -ForegroundColor Cyan
+Write-Host "Building MSI..." -ForegroundColor Cyan
 
 dotnet build (Join-Path $installerDir "Package.wixproj") -c $Configuration
 
 if ($LASTEXITCODE -ne 0) {
-    throw "Installer build failed."
+    throw "MSI build failed."
 }
 
-$msi = Get-ChildItem (Join-Path $installerDir "bin\$Configuration") -Recurse -Filter *.msi |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1
+# Payload for the setup chain: the WebView2 Evergreen bootstrapper (about 1.8 MB). It is
+# downloaded once and reused; the runtime itself is fetched by that bootstrapper on the
+# target machine, and skipped entirely when the runtime is already installed.
+$webView2 = Join-Path $installerDir "MicrosoftEdgeWebView2Setup.exe"
 
-if (-not $msi) {
-    throw "No MSI was produced."
+if (-not (Test-Path $webView2)) {
+    Write-Host "Downloading the WebView2 runtime bootstrapper..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $webView2 -UseBasicParsing
 }
 
-$sizeMb = [math]::Round($msi.Length / 1MB, 1)
+Write-Host "Building setup bundle..." -ForegroundColor Cyan
+
+dotnet build (Join-Path $installerDir "Bundle.wixproj") -c $Configuration
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Bundle build failed."
+}
+
+$outputDir = Join-Path $installerDir "bin\$Configuration"
+
+$msi = Get-ChildItem $outputDir -Filter *.msi | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$setup = Get-ChildItem $outputDir -Filter *.exe | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+if (-not $msi) { throw "No MSI was produced." }
+if (-not $setup) { throw "No setup executable was produced." }
 
 Write-Host ""
-Write-Host "Installer ready: $($msi.FullName) ($sizeMb MB)" -ForegroundColor Green
+Write-Host ("Setup (distribute this): " + $setup.FullName + " (" + [math]::Round($setup.Length / 1MB, 1) + " MB)") -ForegroundColor Green
+Write-Host ("MSI (used by IT / silent deployment): " + $msi.FullName + " (" + [math]::Round($msi.Length / 1MB, 1) + " MB)") -ForegroundColor Gray

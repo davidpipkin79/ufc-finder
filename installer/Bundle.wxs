@@ -1,0 +1,60 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <!--
+    One Setup.exe that carries everything the app needs: the WebView2 runtime it hosts,
+    then the application MSI. Running this never asks the analyst to go and find the
+    runtime themselves.
+  -->
+  <Bundle Name="UFC Event Host Finder"
+          Version="$(var.AppVersion)"
+          Manufacturer="Pipkinsoft"
+          UpgradeCode="6C2F1D84-9A3B-4E7C-B1D5-2A8E4F6C9B07"
+          IconSourceFile="..\UFCFinderApp\ufc.ico">
+
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication Theme="rtfLicense" LicenseFile="License.rtf" />
+    </BootstrapperApplication>
+
+    <!-- Where the WebView2 runtime records itself once installed. It uses WOW6432Node for a
+         machine-wide install and HKCU for a per-user one, so check all three places. Each
+         search writes its own variable: a variable left unset simply reads as false. -->
+    <util:RegistrySearch Id="WebView2Machine"
+                         Root="HKLM"
+                         Key="SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                         Value="pv"
+                         Bitness="always32"
+                         Variable="WebView2Machine" />
+
+    <util:RegistrySearch Id="WebView2Machine64"
+                         Root="HKLM"
+                         Key="SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                         Value="pv"
+                         Bitness="always64"
+                         Variable="WebView2Machine64" />
+
+    <util:RegistrySearch Id="WebView2User"
+                         Root="HKCU"
+                         Key="Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                         Value="pv"
+                         Variable="WebView2User" />
+
+    <Chain>
+      <!-- Skipped when the runtime is already present. Permanent: uninstalling the app must
+           not remove a runtime other applications may also be using. -->
+      <ExePackage Id="WebView2Runtime"
+                  DisplayName="Microsoft Edge WebView2 Runtime"
+                  SourceFile="MicrosoftEdgeWebView2Setup.exe"
+                  InstallArguments="/silent /install"
+                  DetectCondition="WebView2Machine OR WebView2Machine64 OR WebView2User"
+                  Permanent="yes"
+                  PerMachine="yes"
+                  Vital="yes" />
+
+      <MsiPackage SourceFile="bin\Release\UFC-Event-Host-Finder.msi" Vital="yes" />
+    </Chain>
+
+  </Bundle>
+
+</Wix>

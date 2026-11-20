@@ -11,7 +11,11 @@
     <SummaryInformation Description="Installs UFC Event Host Finder, a tool that finds unauthorized showings and advertising of UFC events." />
 
     <!-- Upgrades replace the previous version instead of stacking beside it. -->
-    <MajorUpgrade DowngradeErrorMessage="A newer version of UFC Event Host Finder is already installed." />
+    <!-- AllowSameVersionUpgrades: every build regenerates the ProductCode but keeps the
+         version, so without this a rebuild over an existing install is treated as an
+         unrelated product instead of an upgrade of it. -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of UFC Event Host Finder is already installed."
+                  AllowSameVersionUpgrades="yes" />
 
     <!-- The UpgradeCode is deliberately inherited from the old Visual Studio setup project:
          it identifies the product family, not the tool that built the package. Sharing it is
@@ -42,6 +46,15 @@
                       Bitness="always32" />
     </Property>
 
+    <Property Id="WEBVIEW2_MACHINE64">
+      <RegistrySearch Id="WebView2Machine64"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                      Name="pv"
+                      Type="raw"
+                      Bitness="always64" />
+    </Property>
+
     <Property Id="WEBVIEW2_USER">
       <RegistrySearch Id="WebView2User"
                       Root="HKCU"
@@ -51,7 +64,7 @@
                       Bitness="always32" />
     </Property>
 
-    <Launch Condition="WEBVIEW2_MACHINE OR WEBVIEW2_USER"
+    <Launch Condition="WEBVIEW2_MACHINE OR WEBVIEW2_MACHINE64 OR WEBVIEW2_USER"
            Message="UFC Event Host Finder needs the Microsoft Edge WebView2 Runtime, which is not installed. Download it from https://go.microsoft.com/fwlink/p/?LinkId=2124703 and run this setup again." />
 
     <StandardDirectory Id="ProgramFiles64Folder">

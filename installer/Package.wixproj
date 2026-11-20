@@ -1,16 +1,20 @@
 <Project Sdk="WixToolset.Sdk/5.0.2">
 
   <PropertyGroup>
-    <OutputName>UFC-Event-Host-Finder-Setup</OutputName>
+    <OutputName>UFC-Event-Host-Finder</OutputName>
     <OutputType>Package</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
 
     <!-- Comes from Directory.Build.props, so the MSI version cannot drift from the app's. -->
     <DefineConstants>AppVersion=$(Version)</DefineConstants>
+
+    <!-- The bundle source lives in this folder too; compile only this project's files. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+    <Compile Include="Package.wxs" />
   </ItemGroup>
 
 </Project>
