@@ -1,0 +1,14 @@
+<Project>
+
+  <!--
+    Single source of truth for the product version.
+
+    The app assembly and the installer both read it: the app through the SDK's Version
+    property, the MSI through the AppVersion preprocessor variable set in Package.wixproj.
+    Bump it here and nothing can drift.
+  -->
+  <PropertyGroup>
+    <Version>2.0.0</Version>
+  </PropertyGroup>
+
+</Project>

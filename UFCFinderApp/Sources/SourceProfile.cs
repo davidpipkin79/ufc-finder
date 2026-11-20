@@ -44,8 +44,8 @@ public sealed class SourceProfile
         DisplayName = "Facebook",
         PostSelector = "div[role=\"article\"]",
         PermalinkSelector = "a[href*=\"/posts/\"],a[href*=\"story_fbid\"],a[href*=\"/permalink/\"],a[href*=\"/reel/\"]",
-        SettleDelayMs = 3200,
-        ScrollPasses = 10,
+        SettleDelayMs = 400,
+        ScrollPasses = 4,
         MaxPosts = 150,
         RequiresBrowser = true
     };
@@ -56,8 +56,8 @@ public sealed class SourceProfile
         DisplayName = "Instagram",
         PostSelector = "article",
         PermalinkSelector = "a[href*=\"/p/\"],a[href*=\"/reel/\"]",
-        SettleDelayMs = 3200,
-        ScrollPasses = 8,
+        SettleDelayMs = 400,
+        ScrollPasses = 3,
         MaxPosts = 120,
         RequiresBrowser = true
     };
@@ -69,7 +69,7 @@ public sealed class SourceProfile
         PostSelector = null,
         PermalinkSelector = null,
         SettleDelayMs = 4000,
-        ScrollPasses = 10,
+        ScrollPasses = 5,
         RequiresBrowser = true
     };
 
@@ -186,8 +186,18 @@ public sealed class SourceProfile
                   return best;
                 }
 
-                var scroller = fromPosts() || widest();
-                state.scroller = scroller;
+                var found = fromPosts() || widest();
+
+                // Only ever upgrade the stored container: re-probing must not lose a
+                // good scroller just because a round caught the DOM mid-render.
+                if (found) { state.scroller = found; }
+
+                var scroller = state.scroller;
+
+                if (scroller && !document.contains(scroller)) {
+                  scroller = null;
+                  state.scroller = null;
+                }
 
                 var target = scroller || document.documentElement;
 
@@ -217,19 +227,28 @@ public sealed class SourceProfile
               if (state) { state.scroller = null; }
             }
 
-            var step = Math.max(window.innerHeight || 800, 700);
-
+            // Advance by 80% of the visible height instead of jumping to the very bottom.
+            // A feed loads more when its loader element scrolls into view; slamming
+            // straight to the end skips past that trigger, which is exactly why scrolling
+            // by hand works but a scripted jump does not.
             if (el) {
-              el.scrollTop = el.scrollTop + Math.max(el.clientHeight, step) * 1.5;
-
-              if (document.documentElement.scrollHeight > window.innerHeight + 300) {
-                window.scrollBy(0, step);
+              if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) {
+                // Already at the end: wind back a little so the next advance sweeps the
+                // loader again rather than resting on it.
+                el.scrollTop = Math.max(0, el.scrollTop - el.clientHeight * 0.5);
+                return 'windback';
               }
 
+              el.scrollTop = el.scrollTop + Math.max(120, el.clientHeight * 0.8);
               return 'element';
             }
 
-            window.scrollTo(0, Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0));
+            if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) {
+              window.scrollTo(0, Math.max(0, window.scrollY - window.innerHeight * 0.5));
+              return 'windback';
+            }
+
+            window.scrollBy(0, Math.max(120, window.innerHeight * 0.8));
 
             return 'window';
           } catch (e) {
@@ -237,6 +256,24 @@ public sealed class SourceProfile
           }
         })()
         """;
+
+    /// <summary>How many posts are mounted right now, cheap enough to poll while a page loads.</summary>
+    public static string BuildPostCountScript(SourceProfile profile)
+    {
+        var postSelector = JsonSerializer.Serialize(profile.PostSelector ?? string.Empty);
+
+        return $$"""
+            (function () {
+              try {
+                var postSel = {{postSelector}};
+                if (!postSel) return 0;
+                return document.querySelectorAll(postSel).length;
+              } catch (e) {
+                return 0;
+              }
+            })()
+            """;
+    }
 
     /// <summary>Position and extent of the feed container, used to detect the real end.</summary>
     public static string BuildScrollMeasureScript() => """

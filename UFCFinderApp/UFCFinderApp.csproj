@@ -12,7 +12,9 @@
     <ApplicationIcon>ufc.ico</ApplicationIcon>
     <Product>UFC Event Host Finder</Product>
     <AssemblyTitle>UFC Event Host Finder</AssemblyTitle>
-    <Version>2.0.0</Version>
+    <Company>Pipkinsoft</Company>
+    <Authors>Pipkinsoft</Authors>
+    <Copyright>© Pipkinsoft</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

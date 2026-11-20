@@ -16,7 +16,7 @@ public partial class App : Application
     {
         MessageBox.Show(
             "An unexpected error occurred.\n\n" + e.Exception.Message,
-            "UFC Event Host Finder",
+            AppInfo.Caption,
             MessageBoxButton.OK,
             MessageBoxImage.Error);
 

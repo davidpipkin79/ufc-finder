@@ -250,3 +250,7 @@ paket-files/
 .idea/
 *.sln.iml
 /packages
+
+# Installer build output
+installer/publish/
+installer/extract-test/

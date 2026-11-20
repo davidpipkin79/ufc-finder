@@ -1,0 +1,113 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="UFC Event Host Finder"
+           Manufacturer="Pipkinsoft"
+           Version="$(var.AppVersion)"
+           UpgradeCode="53E41269-D9DE-4F57-8BBA-C511B781D477"
+           Scope="perMachine"
+           Compressed="yes">
+
+    <SummaryInformation Description="Installs UFC Event Host Finder, a tool that finds unauthorized showings and advertising of UFC events." />
+
+    <!-- Upgrades replace the previous version instead of stacking beside it. -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of UFC Event Host Finder is already installed." />
+
+    <!-- The UpgradeCode is deliberately inherited from the old Visual Studio setup project:
+         it identifies the product family, not the tool that built the package. Sharing it is
+         what makes this installer an upgrade of the old app rather than a second, unrelated
+         product. An older 1.x install is therefore found by the MajorUpgrade above and
+         removed while this version installs, so Add/Remove Programs keeps one entry. -->
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="..\UFCFinderApp\ufc.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="http://www.pipkinsoft.com" />
+    <Property Id="ARPCONTACT" Value="Pipkinsoft" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <ui:WixUI Id="WixUI_InstallDir" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <!-- The app hosts WebView2, so the Edge WebView2 Runtime has to be present.
+         Installed per-machine it lives under WOW6432Node; a per-user install puts it
+         in HKCU. Either satisfies the requirement. -->
+    <Property Id="WEBVIEW2_MACHINE">
+      <RegistrySearch Id="WebView2Machine"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                      Name="pv"
+                      Type="raw"
+                      Bitness="always32" />
+    </Property>
+
+    <Property Id="WEBVIEW2_USER">
+      <RegistrySearch Id="WebView2User"
+                      Root="HKCU"
+                      Key="Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+                      Name="pv"
+                      Type="raw"
+                      Bitness="always32" />
+    </Property>
+
+    <Launch Condition="WEBVIEW2_MACHINE OR WEBVIEW2_USER"
+           Message="UFC Event Host Finder needs the Microsoft Edge WebView2 Runtime, which is not installed. Download it from https://go.microsoft.com/fwlink/p/?LinkId=2124703 and run this setup again." />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="MANUFACTURERFOLDER" Name="Pipkinsoft">
+        <Directory Id="INSTALLFOLDER" Name="UFC Event Host Finder" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Pipkinsoft" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <!-- Everything produced by the publish step, keeping its folder layout. -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="publish\**" />
+    </ComponentGroup>
+
+    <Component Id="StartMenuShortcut" Directory="ApplicationProgramsFolder">
+      <Shortcut Id="StartMenuLink"
+                Name="UFC Event Host Finder"
+                Description="Find unauthorised UFC showings and advertising"
+                Target="[INSTALLFOLDER]UFCFinderApp.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\Pipkinsoft\UFC Event Host Finder"
+                     Name="StartMenuShortcut"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <Component Id="DesktopShortcut" Directory="DesktopFolder">
+      <Shortcut Id="DesktopLink"
+                Name="UFC Event Host Finder"
+                Description="Find unauthorised UFC showings and advertising"
+                Target="[INSTALLFOLDER]UFCFinderApp.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\Pipkinsoft\UFC Event Host Finder"
+                     Name="DesktopShortcut"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <Feature Id="Main" Title="UFC Event Host Finder" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+  </Package>
+
+</Wix>

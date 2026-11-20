@@ -32,6 +32,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        // Restore the last size and position, re-centred if that spot is gone.
+        WindowStateStore.Restore(this);
+
         DataContext = _viewModel;
         _browser = new BrowserContentLoader(Browser);
 
@@ -117,13 +120,13 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrWhiteSpace(_viewModel.LegalListPath))
         {
-            MessageBox.Show(this, "A legal list is required.", "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, "A legal list is required.", AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_viewModel.WatchListPath))
         {
-            MessageBox.Show(this, "A watch list is required.", "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, "A watch list is required.", AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -135,7 +138,7 @@ public partial class MainWindow : Window
 
         if (phrases.Count == 0)
         {
-            MessageBox.Show(this, "At least one search phrase is required.", "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, "At least one search phrase is required.", AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -149,7 +152,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             MessageBox.Show(this, "There is a format problem with the legal list.\n\n" + ex.Message,
-                "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -160,7 +163,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             MessageBox.Show(this, "There is a format problem with the watch list.\n\n" + ex.Message,
-                "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -242,7 +245,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             MessageBox.Show(this, "There was an issue processing your results.\n\n" + ex.Message,
-                "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Error);
+                AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -289,7 +292,7 @@ public partial class MainWindow : Window
         catch (IOException ex)
         {
             MessageBox.Show(this, "The workbook could not be saved. Is it open in Excel?\n\n" + ex.Message,
-                "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
@@ -298,7 +301,7 @@ public partial class MainWindow : Window
         if (_lastReport is null || _lastReport.Findings.Count == 0)
         {
             MessageBox.Show(this, "Run a scan first — there are no results to export.",
-                "UFC Event Host Finder", MessageBoxButton.OK, MessageBoxImage.Information);
+                AppInfo.Caption, MessageBoxButton.OK, MessageBoxImage.Information);
 
             report = new ScanReport();
             return false;
@@ -357,7 +360,7 @@ public partial class MainWindow : Window
         var answer = MessageBox.Show(
             this,
             "Sign out of the embedded browser? The next scan will need you to sign in again.",
-            "UFC Event Host Finder",
+            AppInfo.Caption,
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
@@ -397,6 +400,8 @@ public partial class MainWindow : Window
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        WindowStateStore.Save(this);
+
         _cancellation?.Cancel();
         _cancellation?.Dispose();
         _http.Dispose();

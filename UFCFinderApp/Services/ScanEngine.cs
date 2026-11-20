@@ -36,7 +36,7 @@ public sealed class ScanRequest
     /// <summary>Load Facebook pages in the mobile layout, which exposes more of a feed.</summary>
     public bool UseMobileView { get; init; }
 
-    public int DelayBetweenPagesMs { get; init; } = 2000;
+    public int DelayBetweenPagesMs { get; init; } = 500;
 }
 
 /// <summary>
@@ -237,7 +237,16 @@ public sealed class ScanEngine
 
                 try
                 {
-                    var document = await LoadAsync(uri, request, cancellationToken).ConfigureAwait(true);
+                    var document = await LoadAsync(
+                        uri,
+                        request,
+                        message => progress?.Report(new ScanProgress
+                        {
+                            Done = processed,
+                            Total = work.Count,
+                            Message = $"{uri.Host} — {message}"
+                        }),
+                        cancellationToken).ConfigureAwait(true);
 
                     if (document is null || !document.HasContent)
                     {
@@ -315,6 +324,7 @@ public sealed class ScanEngine
     private async Task<LoadedDocument?> LoadAsync(
         Uri uri,
         ScanRequest request,
+        Action<string>? activity,
         CancellationToken cancellationToken)
     {
         var profile = SourceProfile.For(uri);
@@ -326,7 +336,7 @@ public sealed class ScanEngine
                 var target = request.UseMobileView ? ToMobileUrl(uri) : uri.ToString();
 
                 return await _browser
-                    .LoadAsync(target, profile, request.CollectScrollingPosts, cancellationToken)
+                    .LoadAsync(target, profile, request.CollectScrollingPosts, cancellationToken, activity)
                     .ConfigureAwait(true);
             }
 

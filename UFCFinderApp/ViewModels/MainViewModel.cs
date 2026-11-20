@@ -63,7 +63,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private bool _useDiscovery = true;
     private bool _collectPosts = true;
     private bool _useMobileView = true;
-    private double _requestDelaySeconds = 2.5;
+    private double _requestDelaySeconds = 0.5;
     private bool _isBusy;
     private int _progressValue;
     private int _progressMaximum = 1;
